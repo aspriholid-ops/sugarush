@@ -380,7 +380,7 @@
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
-const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywPa-h72ZsiiIWV19ZzzkkSSxvkeJZSHPaok1OpL5o4lvOL6T_i4E2I4fQD4k5qhnL/exec';
 const DEMO_MODE = false; // Ganti false setelah deploy
 
 // ── STATE ───────────────────────────────────────────────────
@@ -657,19 +657,16 @@ async function submitOrder() {
 
   showOverlay('Mengirim ke dapur...');
   try {
-    const res  = await fetch(APPS_SCRIPT_URL, {
+    await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body:   JSON.stringify(payload),
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload),
     });
-    const data = await res.json();
     hideOverlay();
-    if (data.ok) {
-      showToast(`✅ ${orderId} dikirim! Tier: ${data.tier?.toUpperCase()}`, 'success');
-      notify(`✅ Order ${orderId} masuk dapur — ${data.tier?.toUpperCase()}`);
-      setTimeout(resetForm, 2000);
-    } else {
-      showToast('❌ Gagal: ' + data.error, 'error');
-    }
+    showToast(`✅ ${orderId} dikirim ke dapur!`, 'success');
+    notify(`✅ Order ${orderId} masuk dapur — ${payload.priorityTier?.toUpperCase()}`);
+    setTimeout(resetForm, 2000);
   } catch (err) {
     hideOverlay();
     showToast('❌ Koneksi gagal. Coba lagi.', 'error');
