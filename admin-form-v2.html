@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Sugarush">
+<title>Sugarush — Input Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:    #C8973A;
+    --gold-lt: #F5E6D0;
+    --gold-md: #E8C97A;
+    --cream:   #FDFAF6;
+    --brown:   #5C3D1E;
+    --brown-lt:#8B6340;
+    --red:     #D94F3D;
+    --orange:  #E07C2A;
+    --yellow:  #D4A017;
+    --green:   #3A7D44;
+    --text:    #2C1A0E;
+    --muted:   #A08060;
+    --border:  #E8D5BA;
+    --radius:  14px;
+    --shadow:  0 2px 16px rgba(90,50,10,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100dvh;
+    padding-bottom: 40px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(253,250,246,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--gold); }
+  .logo span { font-size: 18px; }
+  .order-id-badge {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    color: var(--brown-lt);
+    background: var(--gold-lt);
+    border: 1px solid var(--border);
+    padding: 5px 10px; border-radius: 20px;
+  }
+
+  /* ── PRIORITY STRIP ── */
+  #priority-strip {
+    margin: 0 16px 0;
+    padding: 0;
+    height: 0; overflow: hidden;
+    transition: height 0.3s ease;
+  }
+  #priority-strip.visible { height: 64px; }
+  #priority-strip-inner {
+    margin-top: 14px;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    transition: background 0.4s;
+  }
+  .pstrip-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .pstrip-label { font-size: 13px; font-weight: 600; }
+  .pstrip-detail { font-size: 11px; margin-left: auto; opacity: 0.7; }
+
+  /* ── MAIN ── */
+  main { padding: 0 16px; }
+
+  /* ── SECTION ── */
+  .section {
+    margin-top: 20px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .section-header {
+    padding: 12px 16px;
+    background: var(--gold-lt);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    color: var(--brown-lt); text-transform: uppercase;
+  }
+  .section-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* ── FIELD ── */
+  .field label {
+    display: block;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .field label .req { color: var(--red); }
+
+  input[type=text], input[type=tel], input[type=date], input[type=time],
+  textarea, select {
+    width: 100%; border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    color: var(--text); background: #fff;
+    -webkit-appearance: none; appearance: none;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--gold); }
+  input.error, textarea.error { border-color: var(--red) !important; }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ── TOGGLE ── */
+  .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .toggle-btn {
+    padding: 13px 8px; border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: #fff; text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; color: var(--muted);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .toggle-btn.active {
+    border-color: var(--gold); background: var(--gold-lt);
+    color: var(--brown); font-weight: 600;
+  }
+
+  /* ── DATE TIME ROW ── */
+  .dt-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ── ITEMS ── */
+  #items-container { display: flex; flex-direction: column; gap: 10px; }
+  .item-row {
+    display: grid; grid-template-columns: 1fr 70px 36px; gap: 8px; align-items: center;
+    animation: slideIn 0.2s ease;
+  }
+  @keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+  .item-row input[type=text] { min-width: 0; }
+  .item-qty {
+    width: 100%; border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 12px 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; text-align: center;
+    color: var(--text); background: #fff; -webkit-appearance: none;
+    outline: none;
+  }
+  .item-qty:focus { border-color: var(--gold); }
+  .item-del {
+    width: 36px; height: 44px; border-radius: 10px;
+    border: 1.5px solid #f0c0b8; background: #fff9f8;
+    color: var(--red); font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+  }
+
+  .add-item-btn {
+    width: 100%; padding: 13px;
+    border: 1.5px dashed var(--border); border-radius: 10px;
+    background: transparent; color: var(--gold);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .add-item-btn:active { background: var(--gold-lt); }
+
+  /* ── NOTES ── */
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  /* ── PRIORITY BOX ── */
+  #priority-box {
+    border-radius: 12px; padding: 16px;
+    transition: background 0.4s, border-color 0.4s;
+    border: 1.5px solid var(--border);
+    background: var(--gold-lt);
+  }
+  #priority-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--brown);
+    margin-bottom: 4px;
+  }
+  #priority-sub { font-size: 12px; color: var(--muted); }
+  #priority-detail { font-size: 13px; color: var(--brown-lt); margin-top: 8px; font-weight: 500; }
+  .tier-legend {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+  }
+  .tier-chip {
+    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* ── SUBMIT ── */
+  #submit-btn {
+    width: 100%; margin-top: 24px; padding: 18px;
+    background: var(--gold); border: none; border-radius: var(--radius);
+    color: #fff; font-family: 'DM Serif Display', serif;
+    font-size: 18px; cursor: pointer; letter-spacing: 0.02em;
+    transition: all 0.2s; box-shadow: 0 4px 20px rgba(200,151,58,0.35);
+  }
+  #submit-btn:active { transform: scale(0.98); }
+  #submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--brown); color: #fff;
+    padding: 12px 24px; border-radius: 30px;
+    font-size: 14px; font-weight: 500;
+    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999; white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { background: var(--green); }
+  #toast.error   { background: var(--red); }
+
+  /* ── LOADING OVERLAY ── */
+  #overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(253,250,246,0.85);
+    backdrop-filter: blur(6px);
+    z-index: 200; align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px;
+  }
+  #overlay.active { display: flex; }
+  .spinner {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #overlay-msg { font-size: 14px; color: var(--muted); }
+
+  /* address hidden when pickup */
+  #address-field { transition: all 0.2s; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Sugarush <span>🍰</span></div>
+  <div class="order-id-badge" id="order-id-display">ORD-...</div>
+</header>
+
+<div id="priority-strip">
+  <div id="priority-strip-inner">
+    <div class="pstrip-dot" id="pstrip-dot"></div>
+    <div class="pstrip-label" id="pstrip-label">—</div>
+    <div class="pstrip-detail" id="pstrip-detail"></div>
+  </div>
+</div>
+
+<main>
+
+  <!-- DATA CUSTOMER -->
+  <div class="section">
+    <div class="section-header">👤 Data Customer</div>
+    <div class="section-body">
+      <div class="field">
+        <label>Nama <span class="req">*</span></label>
+        <input type="text" id="customer-name" placeholder="cth. Keikei" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Nomor HP <span class="req">*</span></label>
+        <input type="tel" id="customer-phone" placeholder="cth. 0895695459216" inputmode="tel">
+      </div>
+    </div>
+  </div>
+
+  <!-- METODE -->
+  <div class="section">
+    <div class="section-header">🛵 Metode</div>
+    <div class="section-body">
+      <div class="field">
+        <label>Diambil sendiri / dikirim? <span class="req">*</span></label>
+        <div class="toggle-row">
+          <button class="toggle-btn active" id="btn-delivery" onclick="setMetode('delivery')">🛵 Delivery</button>
+          <button class="toggle-btn" id="btn-pickup" onclick="setMetode('pickup')">🚶 Ambil Sendiri</button>
+        </div>
+      </div>
+      <div class="field" id="address-field">
+        <label>Alamat <span class="req">*</span></label>
+        <input type="text" id="address" placeholder="cth. Jl Dermaga No 83">
+        <div class="field-hint">Tulis alamat lengkap / patokan.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAKTU -->
+  <div class="section">
+    <div class="section-header">🕐 Waktu Ambil / Antar</div>
+    <div class="section-body">
+      <div class="dt-row">
+        <div class="field">
+          <label>Tanggal <span class="req">*</span></label>
+          <input type="date" id="deadline-date">
+        </div>
+        <div class="field">
+          <label>Jam <span class="req">*</span></label>
+          <input type="time" id="deadline-time">
+        </div>
+      </div>
+      <div class="field-hint">⏱ Waktu order harus siap di tangan customer.</div>
+    </div>
+  </div>
+
+  <!-- ORDERAN -->
+  <div class="section">
+    <div class="section-header">🛍 Orderan</div>
+    <div class="section-body">
+      <div id="items-container"></div>
+      <button class="add-item-btn" onclick="addItem()">＋ Tambah Item</button>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="section">
+    <div class="section-header">📝 Notes</div>
+    <div class="section-body">
+      <div class="field">
+        <label>🔥 Kitchen Note</label>
+        <textarea id="kitchen-note" placeholder="cth. Tulisan di cake 'Happy Bday Mama', pakai fondant merah..." rows="3"></textarea>
+      </div>
+      <div class="field">
+        <label>🎀 Bar / Packaging Note</label>
+        <textarea id="bar-note" placeholder="cth. Box premium + pita emas, sisipkan kartu ucapan..." rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIORITAS OTOMATIS -->
+  <div class="section">
+    <div class="section-header">⚡ Prioritas Otomatis</div>
+    <div class="section-body">
+      <div id="priority-box">
+        <div id="priority-label">Isi waktu dulu...</div>
+        <div id="priority-sub">Sistem akan menghitung skala prioritas otomatis.</div>
+        <div id="priority-detail"></div>
+        <div class="tier-legend">
+          <span class="tier-chip" style="background:#fde8e6;color:#D94F3D"><span class="chip-dot" style="background:#D94F3D"></span>URGENT &lt;90 mnt</span>
+          <span class="tier-chip" style="background:#fff3e0;color:#E07C2A"><span class="chip-dot" style="background:#E07C2A"></span>TINGGI 90–240</span>
+          <span class="tier-chip" style="background:#fff9e0;color:#D4A017"><span class="chip-dot" style="background:#D4A017"></span>NORMAL 240–330</span>
+          <span class="tier-chip" style="background:#e8f5e9;color:#3A7D44"><span class="chip-dot" style="background:#3A7D44"></span>SANTAI &gt;330</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="section">
+    <div class="section-header">👩‍💼 Admin</div>
+    <div class="section-body">
+      <div class="field">
+        <label>Nama Admin yang Input <span class="req">*</span></label>
+        <input type="text" id="admin-name" placeholder="Nama kamu siapa?" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <button id="submit-btn" onclick="submitOrder()">🚀 Kirim ke Dapur</button>
+
+</main>
+
+<div id="toast"></div>
+<div id="overlay">
+  <div class="spinner"></div>
+  <div id="overlay-msg">Mengirim ke dapur...</div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+const DEMO_MODE = false; // Ganti false setelah deploy
+
+// ── STATE ───────────────────────────────────────────────────
+let metode = 'delivery';
+let itemCount = 0;
+let lastTier = null;
+let priorityInterval = null;
+let countdownInterval = null;
+let orderId = generateOrderId();
+
+// ── INIT ────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('order-id-display').textContent = orderId;
+  // Default date = today
+  const today = new Date();
+  document.getElementById('deadline-date').value = toDateInput(today);
+  addItem();
+  startPriorityLoop();
+  requestNotificationPermission();
+});
+
+function generateOrderId() {
+  const now = new Date();
+  const mmdd = String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+  const rand = String(Math.floor(Math.random()*900)+100);
+  return `ORD-${mmdd}-${rand}`;
+}
+
+function toDateInput(d) {
+  return d.toISOString().substring(0,10);
+}
+
+// ── METODE TOGGLE ───────────────────────────────────────────
+function setMetode(m) {
+  metode = m;
+  document.getElementById('btn-delivery').classList.toggle('active', m === 'delivery');
+  document.getElementById('btn-pickup').classList.toggle('active', m === 'pickup');
+  document.getElementById('address-field').style.display = m === 'pickup' ? 'none' : '';
+  calcPriority();
+}
+
+// ── ITEMS ───────────────────────────────────────────────────
+function addItem(name='', qty=1) {
+  itemCount++;
+  const id = `item-${itemCount}`;
+  const container = document.getElementById('items-container');
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.id = id;
+  row.innerHTML = `
+    <input type="text" placeholder="Nama produk" value="${name}"
+      oninput="calcPriority()" class="item-name">
+    <input type="number" min="1" max="99" value="${qty}"
+      oninput="calcPriority()" class="item-qty" inputmode="numeric">
+    <button class="item-del" onclick="removeItem('${id}')">✕</button>
+  `;
+  container.appendChild(row);
+  calcPriority();
+}
+
+function removeItem(id) {
+  const el = document.getElementById(id);
+  if (el) { el.remove(); calcPriority(); }
+}
+
+function getItems() {
+  const rows = document.querySelectorAll('.item-row');
+  const items = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.item-name').value.trim();
+    const qty  = parseInt(row.querySelector('.item-qty').value) || 1;
+    if (name) items.push({ name, qty });
+  });
+  return items;
+}
+
+// ── PRIORITY ENGINE ─────────────────────────────────────────
+function getDeadline() {
+  const d = document.getElementById('deadline-date').value;
+  const t = document.getElementById('deadline-time').value;
+  if (!d || !t) return null;
+  return new Date(`${d}T${t}:00`);
+}
+
+function calcEffectiveMinutes() {
+  const deadline = getDeadline();
+  if (!deadline) return null;
+
+  const now     = new Date();
+  const diffMin = (deadline - now) / 60000;
+  let eff       = diffMin;
+
+  if (metode === 'delivery')                  eff -= 20;
+  const items = getItems();
+  const uniqueCount = items.length;
+  if (uniqueCount >= 6)       eff -= 30;
+  else if (uniqueCount >= 3)  eff -= 15;
+  const kitchenNote = document.getElementById('kitchen-note').value.trim();
+  if (kitchenNote)            eff -= 10;
+  const totalQty = items.reduce((s,i) => s + i.qty, 0);
+  if (totalQty > 5)           eff -= 10;
+
+  // Early-morning rule
+  const deadlineTomorrow = isNextDay(now, deadline);
+  const deadlineHour = deadline.getHours();
+  const nowHour      = now.getHours();
+  if (deadlineTomorrow && deadlineHour >= 8 && deadlineHour < 10 && nowHour >= 19) {
+    eff = 150; // force TINGGI
+  }
+
+  return Math.round(eff);
+}
+
+function isNextDay(now, deadline) {
+  const n = new Date(now); n.setHours(0,0,0,0);
+  const d = new Date(deadline); d.setHours(0,0,0,0);
+  return (d - n) === 86400000;
+}
+
+function getTier(score) {
+  if (score === null) return null;
+  if (score < 90)  return 'urgent';
+  if (score < 240) return 'tinggi';
+  if (score < 330) return 'normal';
+  return 'santai';
+}
+
+const tierConfig = {
+  urgent: { label:'🔴 URGENT',  bg:'#fde8e6', border:'#D94F3D', dot:'#D94F3D', stripBg:'rgba(217,79,61,0.12)' },
+  tinggi: { label:'🟠 TINGGI',  bg:'#fff3e0', border:'#E07C2A', dot:'#E07C2A', stripBg:'rgba(224,124,42,0.12)' },
+  normal: { label:'🟡 NORMAL',  bg:'#fffde0', border:'#D4A017', dot:'#D4A017', stripBg:'rgba(212,160,23,0.1)'  },
+  santai: { label:'🟢 SANTAI',  bg:'#e8f5e9', border:'#3A7D44', dot:'#3A7D44', stripBg:'rgba(58,125,68,0.1)'  },
+};
+
+function calcPriority() {
+  const score = calcEffectiveMinutes();
+  const tier  = getTier(score);
+  const box   = document.getElementById('priority-box');
+  const lbl   = document.getElementById('priority-label');
+  const sub   = document.getElementById('priority-sub');
+  const det   = document.getElementById('priority-detail');
+  const strip = document.getElementById('priority-strip');
+  const stripInner = document.getElementById('priority-strip-inner');
+  const pDot  = document.getElementById('pstrip-dot');
+  const pLbl  = document.getElementById('pstrip-label');
+  const pDet  = document.getElementById('pstrip-detail');
+
+  if (!tier) {
+    lbl.textContent = 'Isi waktu dulu...';
+    sub.textContent = 'Sistem akan menghitung skala prioritas otomatis.';
+    det.textContent = '';
+    strip.classList.remove('visible');
+    box.style.background = 'var(--gold-lt)';
+    box.style.borderColor = 'var(--border)';
+    return;
+  }
+
+  const cfg = tierConfig[tier];
+  const deadline = getDeadline();
+  const rawMin   = Math.round((deadline - new Date()) / 60000);
+  const h = Math.floor(Math.abs(rawMin)/60), m = Math.abs(rawMin)%60;
+  const timeStr = rawMin < 0
+    ? `⚠️ Lewat ${h>0?h+'j ':''}${m}mnt`
+    : `${h>0?h+'j ':''}${m} mnt lagi`;
+
+  // Update priority box
+  lbl.textContent = cfg.label;
+  sub.textContent = `Effective: ${score} mnt`;
+  det.textContent = `Deadline ${timeStr}`;
+  box.style.background   = cfg.bg;
+  box.style.borderColor  = cfg.border;
+
+  // Update sticky strip
+  strip.classList.add('visible');
+  stripInner.style.background = cfg.stripBg;
+  pDot.style.background = cfg.dot;
+  pLbl.textContent = cfg.label;
+  pDet.textContent  = timeStr;
+
+  // Notification if tier escalated
+  if (lastTier && tier !== lastTier) {
+    const tierOrder = ['santai','normal','tinggi','urgent'];
+    if (tierOrder.indexOf(tier) > tierOrder.indexOf(lastTier)) {
+      notify(`⚡ Order naik ke ${cfg.label.split(' ')[1]}!`);
+    }
+  }
+  lastTier = tier;
+}
+
+function startPriorityLoop() {
+  clearInterval(priorityInterval);
+  priorityInterval = setInterval(calcPriority, 30000);
+
+  document.getElementById('deadline-date').addEventListener('change', calcPriority);
+  document.getElementById('deadline-time').addEventListener('change', calcPriority);
+  document.getElementById('kitchen-note').addEventListener('input', calcPriority);
+}
+
+// ── NOTIFICATIONS ────────────────────────────────────────────
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+function notify(msg) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('Sugarush', { body: msg, icon: '🍰' });
+  }
+}
+
+// ── VALIDATION ───────────────────────────────────────────────
+function validate() {
+  let ok = true;
+  const required = [
+    { id:'customer-name',  label:'Nama customer' },
+    { id:'customer-phone', label:'Nomor HP' },
+    { id:'admin-name',     label:'Nama admin' },
+  ];
+  required.forEach(r => {
+    const el = document.getElementById(r.id);
+    if (!el.value.trim()) { el.classList.add('error'); ok = false; }
+    else el.classList.remove('error');
+  });
+
+  const dateEl = document.getElementById('deadline-date');
+  const timeEl = document.getElementById('deadline-time');
+  if (!dateEl.value) { dateEl.classList.add('error'); ok = false; } else dateEl.classList.remove('error');
+  if (!timeEl.value) { timeEl.classList.add('error'); ok = false; } else timeEl.classList.remove('error');
+
+  if (metode === 'delivery') {
+    const addrEl = document.getElementById('address');
+    if (!addrEl.value.trim()) { addrEl.classList.add('error'); ok = false; } else addrEl.classList.remove('error');
+  }
+
+  if (getItems().length === 0) { showToast('⚠️ Tambahkan minimal 1 item order', 'error'); ok = false; }
+  return ok;
+}
+
+// ── SUBMIT ───────────────────────────────────────────────────
+async function submitOrder() {
+  if (!validate()) { showToast('Lengkapi field yang wajib diisi', 'error'); return; }
+
+  const score = calcEffectiveMinutes();
+  const tier  = getTier(score);
+
+  const payload = {
+    action:       'addOrder',
+    orderId,
+    createdAt:    new Date().toISOString(),
+    adminName:    document.getElementById('admin-name').value.trim(),
+    customer: {
+      name:  document.getElementById('customer-name').value.trim(),
+      phone: document.getElementById('customer-phone').value.trim(),
+    },
+    metode,
+    address:      metode === 'delivery' ? document.getElementById('address').value.trim() : '',
+    deadline:     `${document.getElementById('deadline-date').value}T${document.getElementById('deadline-time').value}`,
+    items:        getItems(),
+    kitchenNote:  document.getElementById('kitchen-note').value.trim(),
+    barNote:      document.getElementById('bar-note').value.trim(),
+    priorityTier: tier,
+    priorityScore: score,
+  };
+
+  if (DEMO_MODE) {
+    showOverlay('Demo Mode — menyimulasikan kirim...');
+    await sleep(1200);
+    hideOverlay();
+    showToast(`✅ [DEMO] ${orderId} dikirim! Tier: ${tier?.toUpperCase()}`, 'success');
+    console.log('DEMO payload:', payload);
+    setTimeout(resetForm, 2000);
+    return;
+  }
+
+  showOverlay('Mengirim ke dapur...');
+  try {
+    const res  = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body:   JSON.stringify(payload),
+    });
+    const data = await res.json();
+    hideOverlay();
+    if (data.ok) {
+      showToast(`✅ ${orderId} dikirim! Tier: ${data.tier?.toUpperCase()}`, 'success');
+      notify(`✅ Order ${orderId} masuk dapur — ${data.tier?.toUpperCase()}`);
+      setTimeout(resetForm, 2000);
+    } else {
+      showToast('❌ Gagal: ' + data.error, 'error');
+    }
+  } catch (err) {
+    hideOverlay();
+    showToast('❌ Koneksi gagal. Coba lagi.', 'error');
+    console.error(err);
+  }
+}
+
+function resetForm() {
+  orderId = generateOrderId();
+  document.getElementById('order-id-display').textContent = orderId;
+  document.getElementById('customer-name').value  = '';
+  document.getElementById('customer-phone').value = '';
+  document.getElementById('address').value        = '';
+  document.getElementById('deadline-time').value  = '';
+  document.getElementById('kitchen-note').value   = '';
+  document.getElementById('bar-note').value       = '';
+  document.getElementById('admin-name').value     = '';
+  document.getElementById('items-container').innerHTML = '';
+  itemCount = 0; lastTier = null;
+  document.getElementById('deadline-date').value  = toDateInput(new Date());
+  setMetode('delivery');
+  addItem();
+  calcPriority();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── UI HELPERS ───────────────────────────────────────────────
+function showOverlay(msg) {
+  document.getElementById('overlay-msg').textContent = msg;
+  document.getElementById('overlay').classList.add('active');
+}
+function hideOverlay() {
+  document.getElementById('overlay').classList.remove('active');
+}
+
+let toastTimer;
+function showToast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 3200);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
