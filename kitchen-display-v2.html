@@ -700,18 +700,22 @@ async function confirmComplete() {
   }
 
   try {
-    await fetch(APPS_SCRIPT_URL, {
+    const res  = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action:'markComplete', orderId, crewName }),
+      body:   JSON.stringify({ action:'markComplete', orderId, crewName }),
     });
-    removeOrderCard(orderId);
-    addDoneEntry(orderId, crewName);
-    const doneNow = parseInt(document.getElementById('stat-done').textContent || '0') + 1;
-    document.getElementById('stat-done').textContent = doneNow;
-    document.getElementById('stat-active').textContent = allOrders.length;
-    showToast(`✅ ${orderId} selesai!`, 'ok');
+    const data = await res.json();
+    if (data.ok) {
+      removeOrderCard(orderId);
+      addDoneEntry(orderId, crewName);
+      const doneNow = parseInt(document.getElementById('stat-done').textContent || '0') + 1;
+      document.getElementById('stat-done').textContent = doneNow;
+      document.getElementById('stat-active').textContent = allOrders.length;
+      showToast(`✅ ${orderId} selesai!`, 'ok');
+    } else {
+      if (btn) { btn.classList.remove('completing'); btn.textContent = '✓ Selesai'; }
+      showToast('❌ Gagal: ' + data.error, 'err');
+    }
   } catch (err) {
     if (btn) { btn.classList.remove('completing'); btn.textContent = '✓ Selesai'; }
     showToast('❌ Koneksi gagal', 'err');
