@@ -368,7 +368,7 @@ async function confirmDone(){
   if(btn){btn.classList.add('completing');btn.textContent='...';}
   if(DEMO){await sl(600);rmCard(id);addDone(id,crew);playCricket();document.getElementById('sD').textContent=++doneCount;document.getElementById('sA').textContent=orders.length;toast(`✅ ${id} selesai!`,'ok');return;}
   try{
-    await fetch(URL_AS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'markComplete',orderId:id,crewName:crew})});
+    const p=new URLSearchParams({action:'markComplete',orderId:id,crewName:crew});await fetch(URL_AS+'?'+p.toString(),{method:'GET',mode:'no-cors'});
     rmCard(id);addDone(id,crew);
     playCricket();
     document.getElementById('sD').textContent=++doneCount;
