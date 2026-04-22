@@ -300,8 +300,8 @@ async function confirmDone(){
   if(!pendingId)return;
   const crew=document.getElementById('crewIn').value.trim();
   if(!crew){document.getElementById('crewIn').style.borderColor='#D94F3D';return;}
-  closeModal();
   const id=pendingId;
+  closeModal();
   const btn=document.getElementById(`btn-${id}`);
   if(btn){btn.classList.add('completing');btn.textContent='...';}
   if(DEMO){await sl(600);rmCard(id);addDone(id,crew);document.getElementById('sD').textContent=++doneCount;document.getElementById('sA').textContent=orders.length;toast(`✅ ${id} selesai!`,'ok');return;}
