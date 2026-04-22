@@ -166,6 +166,60 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 <div id="toast"></div>
 
 <script>
+
+// ── AUDIO ENGINE ──
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let actx = null;
+
+function getCtx() {
+  if (!actx) actx = new AudioCtx();
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+
+function playBell() {
+  // Lonceng — order masuk
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  [0, 0.15, 0.3].forEach((delay, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, t + delay);
+    osc.frequency.exponentialRampToValueAtTime(660, t + delay + 0.4);
+    gain.gain.setValueAtTime(0, t + delay);
+    gain.gain.linearRampToValueAtTime(0.4 - i*0.1, t + delay + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.6);
+    osc.start(t + delay);
+    osc.stop(t + delay + 0.6);
+  });
+}
+
+function playCricket() {
+  // Kricket — order selesai
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  for (let r = 0; r < 2; r++) {
+    const rOff = r * 0.25;
+    for (let i = 0; i < 6; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(3200 + (i % 2) * 400, t + rOff + i * 0.03);
+      gain.gain.setValueAtTime(0.08, t + rOff + i * 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + rOff + i * 0.03 + 0.025);
+      osc.start(t + rOff + i * 0.03);
+      osc.stop(t + rOff + i * 0.03 + 0.025);
+    }
+  }
+}
+
+// Unlock audio on first user interaction
+document.addEventListener('click', () => getCtx(), { once: true });
+document.addEventListener('keydown', () => getCtx(), { once: true });
+
 const URL_AS = 'https://script.google.com/macros/s/AKfycbywPa-h72ZsiiIWV19ZzzkkSSxvkeJZSHPaok1OpL5o4lvOL6T_i4E2I4fQD4k5qhnL/exec';
 const DEMO = false;
 const RI = 30;
@@ -215,9 +269,17 @@ async function loadData(){
   }catch(e){toast('⚠️ Gagal memuat data','err');}
 }
 
+let prevOrderIds = new Set();
+
 function render(tod,up,done,stats){
   tod.forEach(o=>{o.priorityScore=score(o);o.priorityTier=tier(o.priorityScore);});
   tod.sort((a,b)=>a.priorityScore-b.priorityScore);
+  // Detect new orders → play bell
+  const newIds = new Set(tod.map(o=>o.orderId));
+  let hasNew = false;
+  newIds.forEach(id=>{ if(!prevOrderIds.has(id)) hasNew=true; });
+  if(hasNew && prevOrderIds.size > 0) playBell();
+  prevOrderIds = newIds;
   orders=tod; upcoming=up||[]; doneCount=done||0;
   renderCards(); renderUp(); renderStats(stats);
   document.getElementById('syncTime').textContent=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -304,10 +366,11 @@ async function confirmDone(){
   closeModal();
   const btn=document.getElementById(`btn-${id}`);
   if(btn){btn.classList.add('completing');btn.textContent='...';}
-  if(DEMO){await sl(600);rmCard(id);addDone(id,crew);document.getElementById('sD').textContent=++doneCount;document.getElementById('sA').textContent=orders.length;toast(`✅ ${id} selesai!`,'ok');return;}
+  if(DEMO){await sl(600);rmCard(id);addDone(id,crew);playCricket();document.getElementById('sD').textContent=++doneCount;document.getElementById('sA').textContent=orders.length;toast(`✅ ${id} selesai!`,'ok');return;}
   try{
     await fetch(URL_AS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'markComplete',orderId:id,crewName:crew})});
     rmCard(id);addDone(id,crew);
+    playCricket();
     document.getElementById('sD').textContent=++doneCount;
     document.getElementById('sA').textContent=orders.length;
     toast(`✅ ${id} selesai!`,'ok');
